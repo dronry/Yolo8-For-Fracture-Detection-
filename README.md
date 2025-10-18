@@ -30,13 +30,16 @@ The YOLOv8 architecture (yolov8s.yaml) is loaded without pretrained weights.
 CBAM modules are then inserted into the model using a recursive injection function.
 Afterwards, pretrained YOLOv8 weights (yolov8s.pt) are partially loaded with strict=False, allowing the base weights to initialize all compatible layers while skipping CBAM-specific parameters.
 
+# Dataset Link 
+https://www.kaggle.com/datasets/mahmudulhasantasin/fracatlas-original-dataset
+
 # Improvements
 
 By incorporating CBAM, the model:
 
-Enhances attention toward fine-grained fracture patterns.
-Improves feature discrimination between fractured and non-fractured regions.
-Reduces false detections from bone edges or shadows.
-Provides higher precision, recall, and mAP50 on X-ray datasets.
+- Enhances attention toward fine-grained fracture patterns.
+- Improves feature discrimination between fractured and non-fractured regions.
+- Reduces false detections from bone edges or shadows.
+- Provides higher precision, recall, and mAP50 on X-ray datasets.
 
 The YOLOv8-CBAM model integrates lightweight, adaptive attention modules into a robust detection framework, achieving improved localization and classification of fracture regions in medical X-ray images. It offers a balance between accuracy, interpretability, and computational efficiency, making it suitable for clinical-grade real-time diagnostic systems.
