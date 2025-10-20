@@ -6,9 +6,6 @@ import random
 import numpy as np
 
 
-# ----------------------------
-# 1️⃣ Utility: Seed setup
-# ----------------------------
 def set_seed(seed: int = 42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -18,9 +15,6 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.benchmark = False
 
 
-# ----------------------------
-# 2️⃣ Define CBAM (Convolutional Block Attention Module)
-# ----------------------------
 class CBAMBlock(nn.Module):
     def __init__(self, channels, reduction=16, kernel_size=7):
         super(CBAMBlock, self).__init__()
@@ -51,10 +45,6 @@ class CBAMBlock(nn.Module):
 
         return x
 
-
-# ----------------------------
-# 3️⃣ Recursive CBAM injection
-# ----------------------------
 def inject_cbam_recursive(module, min_channels=128):
     """
     Recursively adds CBAM after convolutional layers
@@ -69,9 +59,7 @@ def inject_cbam_recursive(module, min_channels=128):
             inject_cbam_recursive(child, min_channels)
 
 
-# ----------------------------
-# 4️⃣ Train YOLOv8 with CBAM
-# ----------------------------
+
 def train_yolo_attention(data_yaml='fracatlas/data.yaml',
                           pretrained='yolov8s.pt',
                           epochs=100,
@@ -81,15 +69,15 @@ def train_yolo_attention(data_yaml='fracatlas/data.yaml',
                           device=0):
 
     set_seed()
-    print("✅ Loading YOLOv8 architecture only...")
+    print("Loading YOLOv8 architecture only...")
     yolo = YOLO('yolov8s.yaml')  # Load structure only (no weights)
 
     model_container = yolo.model.model if hasattr(yolo.model, 'model') else yolo.model
 
-    print("✅ Injecting CBAM attention modules...")
+    print("Injecting CBAM attention modules...")
     inject_cbam_recursive(model_container, min_channels=128)
 
-    print("✅ Loading pretrained weights (skip CBAM params)...")
+    print("Loading pretrained weights (skip CBAM params)...")
     checkpoint = torch.load(pretrained, map_location='cpu')
     if 'model' in checkpoint:
         pretrained_dict = checkpoint['model'].float().state_dict()
@@ -113,26 +101,24 @@ def train_yolo_attention(data_yaml='fracatlas/data.yaml',
         device=device
     )
 
-    print("🎯 Training complete — model saved in `runs/detect/`.")
+    print("Training complete — model saved in `runs/detect/`.")
 
 
-# ----------------------------
-# 5️⃣ Evaluate Trained Model
-# ----------------------------
+
 def eval_yolo_attention(weights='runs/detect/fracture_yolo8_attention/weights/best.pt',
                         data_yaml='fracatlas/data.yaml',
                         sample_image='xray_sample.png',
                         device=0):
-    print("✅ Loading trained model...")
+    print("Loading trained model...")
     model = YOLO(weights)
 
-    print("🔍 Running inference on sample image...")
+    print(" Running inference on sample image...")
     results = model.predict(sample_image, device=device, save=True, conf=0.25)
 
-    print("📊 Evaluating on validation set...")
+    print("Evaluating on validation set...")
     metrics = model.val(data=data_yaml, device=device)
 
-    print("\n📈 Validation Results:")
+    print("Validation Results:")
     print(f"mAP50: {metrics.box.map50:.4f}")
     print(f"Precision: {metrics.box.precision:.4f}")
     print(f"Recall: {metrics.box.recall:.4f}")
@@ -143,12 +129,11 @@ def eval_yolo_attention(weights='runs/detect/fracture_yolo8_attention/weights/be
     print(f"Approx. Accuracy: {acc:.4f}")
 
 
-# ----------------------------
-# 6️⃣ Main Execution
-# ----------------------------
+
 if __name__ == "__main__":
     train_yolo_attention()
     eval_yolo_attention()
+
 
 
 
